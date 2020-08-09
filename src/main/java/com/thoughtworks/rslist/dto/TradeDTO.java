@@ -17,8 +17,8 @@ public class TradeDTO {
     @Id
     @GeneratedValue
     private int id;
-    private int amount;
-    private int rank;
+    private int money;
+    private int position;
 
     @OneToOne
     private RsEventDto rsEventDto;
