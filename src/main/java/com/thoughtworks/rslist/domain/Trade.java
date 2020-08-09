@@ -10,6 +10,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Trade {
-    private int money;
-    private int position;
+    private int amount;
+    private int rank;
 }

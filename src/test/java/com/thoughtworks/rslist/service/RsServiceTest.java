@@ -3,7 +3,7 @@ package com.thoughtworks.rslist.service;
 import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.RsEventDto;
-import com.thoughtworks.rslist.dto.TradeDTO;
+import com.thoughtworks.rslist.dto.TradeDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepository;
@@ -118,17 +118,17 @@ class RsServiceTest {
                         .voteNum(2)
                         .user(userDto)
                         .build();
-        TradeDTO tradeDTO =
-                TradeDTO.builder()
+        TradeDto tradeDTO =
+                TradeDto.builder()
                         .rsEventDto(rsEventDto)
-                        .money(100)
-                        .position(1)
+                        .amount(100)
+                        .rank(1)
                         .build();
         when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto));
         when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
         when(tradeRepository.findById(anyInt())).thenReturn(Optional.of(tradeDTO));
 
-        Trade trade = Trade.builder().money(tradeDTO.getMoney()).position(tradeDTO.getPosition()).build();
+        Trade trade = Trade.builder().amount(tradeDTO.getAmount()).rank(tradeDTO.getRank()).build();
         rsEventRepository.save(rsEventDto);
         userRepository.save(userDto);
 
@@ -136,4 +136,60 @@ class RsServiceTest {
 
         verify(tradeRepository).save(tradeDTO);
     }
+
+    @Test
+    void shouldThrowExceptionWhenMoneyIsNotEnoughToBuyPresentRank() {
+        UserDto userDto =
+                UserDto.builder()
+                        .voteNum(5)
+                        .phone("18888888888")
+                        .gender("female")
+                        .email("a@b.com")
+                        .age(19)
+                        .userName("xiaoli")
+                        .id(2)
+                        .build();
+        RsEventDto rsEventDto1 =
+                RsEventDto.builder()
+                        .eventName("event name")
+                        .id(1)
+                        .keyword("keyword")
+                        .voteNum(2)
+                        .user(userDto)
+                        .build();
+        RsEventDto rsEventDto2 =
+                RsEventDto.builder()
+                        .eventName("event name 2")
+                        .id(3)
+                        .keyword("keyword 2")
+                        .voteNum(3)
+                        .user(userDto)
+                        .build();
+        TradeDto tradeDto1 =
+                TradeDto.builder()
+                        .rsEventDto(rsEventDto1)
+                        .amount(100)
+                        .rank(1)
+                        .build();
+        TradeDto tradeDto2 =
+                TradeDto.builder()
+                        .rsEventDto(rsEventDto2)
+                        .amount(50)
+                        .rank(1)
+                        .build();
+        when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto1));
+        when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
+        when(tradeRepository.findTradeDtoByRanking(anyInt())).thenReturn(Optional.of(tradeDto1));
+
+        Trade trade = Trade.builder().amount(tradeDto2.getAmount()).rank(tradeDto2.getRank()).build();
+        tradeRepository.save(tradeDto1);
+
+        assertThrows(
+                RuntimeException.class, () -> {
+                    rsService.buy(trade, rsEventDto2.getId());
+                }
+        );
+    }
+
+
 }

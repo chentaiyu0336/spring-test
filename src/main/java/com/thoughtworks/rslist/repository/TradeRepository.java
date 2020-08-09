@@ -1,7 +1,11 @@
 package com.thoughtworks.rslist.repository;
 
-import com.thoughtworks.rslist.dto.TradeDTO;
+import com.thoughtworks.rslist.dto.TradeDto;
 import org.springframework.data.repository.CrudRepository;
 
-public interface TradeRepository extends CrudRepository<TradeDTO, Integer> {
+import java.util.Optional;
+
+public interface TradeRepository extends CrudRepository<TradeDto, Integer> {
+
+    Optional<TradeDto> findTradeDtoByRanking(int rank);
 }

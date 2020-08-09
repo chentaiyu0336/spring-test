@@ -13,12 +13,12 @@ import javax.persistence.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TradeDTO {
+public class TradeDto {
     @Id
     @GeneratedValue
     private int id;
-    private int money;
-    private int position;
+    private int amount;
+    private int rank;
 
     @OneToOne
     private RsEventDto rsEventDto;

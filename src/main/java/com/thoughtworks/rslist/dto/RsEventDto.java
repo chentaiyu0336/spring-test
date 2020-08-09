@@ -21,5 +21,5 @@ public class RsEventDto {
   @ManyToOne private UserDto user;
 
   @OneToOne(cascade = CascadeType.ALL, mappedBy = "rsEventDto")
-  private TradeDTO tradeDTO;
+  private TradeDto tradeDTO;
 }

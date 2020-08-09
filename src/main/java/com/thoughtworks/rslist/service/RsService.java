@@ -3,14 +3,13 @@ package com.thoughtworks.rslist.service;
 import com.thoughtworks.rslist.domain.Trade;
 import com.thoughtworks.rslist.domain.Vote;
 import com.thoughtworks.rslist.dto.RsEventDto;
-import com.thoughtworks.rslist.dto.TradeDTO;
+import com.thoughtworks.rslist.dto.TradeDto;
 import com.thoughtworks.rslist.dto.UserDto;
 import com.thoughtworks.rslist.dto.VoteDto;
 import com.thoughtworks.rslist.repository.RsEventRepository;
 import com.thoughtworks.rslist.repository.TradeRepository;
 import com.thoughtworks.rslist.repository.UserRepository;
 import com.thoughtworks.rslist.repository.VoteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
@@ -57,12 +56,21 @@ public class RsService {
         RsEventDto rsEventDto = rsEventRepository.findById(rsEventId).orElse(null);
         if (rsEventDto == null)
             throw new RuntimeException();
-        TradeDTO tradeDTO =
-                TradeDTO.builder()
+        TradeDto tradeDTO =
+                TradeDto.builder()
                         .rsEventDto(rsEventDto)
-                        .money(trade.getMoney())
-                        .position(trade.getPosition())
+                        .amount(trade.getAmount())
+                        .rank(trade.getRank())
                         .build();
+        TradeDto tradeFind = tradeRepository.findTradeDtoByRanking(trade.getRank()).orElse(null);
+        if (tradeFind != null) {
+            if (tradeFind.getAmount() >= trade.getAmount()) {
+                throw new RuntimeException();
+            } else {
+                tradeRepository.delete(tradeFind);
+            }
+        }
+
         tradeRepository.save(tradeDTO);
     }
 }
