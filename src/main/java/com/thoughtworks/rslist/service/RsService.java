@@ -68,9 +68,10 @@ public class RsService {
                 throw new RuntimeException();
             } else {
                 tradeRepository.delete(tradeFind);
+                rsEventRepository.delete(tradeFind.getRsEventDto());
             }
         }
-
+        rsEventRepository.save(rsEventDto);
         tradeRepository.save(tradeDTO);
     }
 }

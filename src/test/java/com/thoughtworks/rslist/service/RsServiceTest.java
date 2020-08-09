@@ -171,18 +171,17 @@ class RsServiceTest {
                         .amount(100)
                         .rank(1)
                         .build();
+
+        when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto2));
+        when(tradeRepository.findTradeDtoByRanking(anyInt())).thenReturn(Optional.of(tradeDto1));
+
         TradeDto tradeDto2 =
                 TradeDto.builder()
                         .rsEventDto(rsEventDto2)
                         .amount(50)
                         .rank(1)
                         .build();
-        when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto1));
-        when(userRepository.findById(anyInt())).thenReturn(Optional.of(userDto));
-        when(tradeRepository.findTradeDtoByRanking(anyInt())).thenReturn(Optional.of(tradeDto1));
-
         Trade trade = Trade.builder().amount(tradeDto2.getAmount()).rank(tradeDto2.getRank()).build();
-        tradeRepository.save(tradeDto1);
 
         assertThrows(
                 RuntimeException.class, () -> {
@@ -191,5 +190,61 @@ class RsServiceTest {
         );
     }
 
+
+    @Test
+    void shouldUpdateCurRankWhenAmountIsEnoughToTrade() {
+        UserDto userDto =
+                UserDto.builder()
+                        .voteNum(5)
+                        .phone("18888888888")
+                        .gender("female")
+                        .email("a@b.com")
+                        .age(19)
+                        .userName("xiaoli")
+                        .id(2)
+                        .build();
+        RsEventDto rsEventDto1 =
+                RsEventDto.builder()
+                        .eventName("event name")
+                        .id(1)
+                        .keyword("keyword")
+                        .voteNum(2)
+                        .user(userDto)
+                        .build();
+        RsEventDto rsEventDto2 =
+                RsEventDto.builder()
+                        .eventName("event name 2")
+                        .id(3)
+                        .keyword("keyword 2")
+                        .voteNum(3)
+                        .user(userDto)
+                        .build();
+        TradeDto tradeDto1 =
+                TradeDto.builder()
+                        .rsEventDto(rsEventDto1)
+                        .amount(100)
+                        .rank(1)
+                        .build();
+
+
+        when(rsEventRepository.findById(anyInt())).thenReturn(Optional.of(rsEventDto2));
+        when(tradeRepository.findTradeDtoByRanking(anyInt())).thenReturn(Optional.of(tradeDto1));
+
+        TradeDto tradeDto2 =
+                TradeDto.builder()
+                        .rsEventDto(rsEventDto2)
+                        .amount(200)
+                        .rank(1)
+                        .build();
+        Trade trade=Trade.builder().rank(tradeDto2.getRank()).amount(tradeDto2.getAmount()).build();
+
+
+        rsService.buy(trade,rsEventDto2.getId());
+
+        verify(tradeRepository).delete(tradeDto1);
+        verify(tradeRepository).save(tradeDto2);
+        verify(rsEventRepository).delete(tradeDto1.getRsEventDto());
+        verify(rsEventRepository).save(tradeDto2.getRsEventDto());
+    }
 
 }
